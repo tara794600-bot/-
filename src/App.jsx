@@ -46,7 +46,7 @@ const handleSubmit = async (e) => {
       const data = { name, phone, debt, payment, message };
 
       // 🔥 Vercel API로 전송
-      const response = await fetch("API/텔레.js", {
+      const response = await fetch("api/텔레.js", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
