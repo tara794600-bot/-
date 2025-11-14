@@ -1,8 +1,20 @@
+import React,{ useEffect} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import 마우스 from './1103 나란 사이트/마우스.png'
-import 상담신청 from'./1103 나란 사이트/상담신청.png'
+import roll1 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/01.png";
+import roll2 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/02.png";
+import roll3 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/03.png";
+import roll4 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/04.png";
+import roll5 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/05.png";
+import roll6 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/06.png";
+import roll7 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/07.png";
+import roll8 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/08.png";
+import roll9 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/환불사례_01.png";
+import roll10 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/환불사례_02.png";
+import roll11 from "./1103 나란 사이트/1103 나란 사이트 (2)/사건사례/환불사례_03.png";
 import naran from './1103 나란 사이트/naran_logo.png'
+import 상담 from './1103 나란 사이트/1103 나란 사이트 (2)/상담.png';
 import 경고 from './1103 나란 사이트/경고.png'
 
 function scrollToSection(sectionId) {
@@ -13,6 +25,74 @@ function scrollToSection(sectionId) {
 }
 
 function App() {
+ const handleSubmit = async (e) => {
+    e.preventDefault(); // 새로고침 방지
+
+    try {
+      // 폼 데이터 수집
+      const form = e.target;
+      const name = form.querySelector("input[placeholder='이름을 입력하세요']").value.trim();
+      const phone = form.querySelector("input[placeholder=\"'-'없이 입력해 주세요\"]").value.trim();
+      const debt = form.querySelector("input[placeholder='총 채무를 입력해 주세요']").value.trim();
+      const payment = form.querySelector("input[placeholder='월 상환액을 입력해 주세요']").value.trim();
+      const message = form.querySelector("textarea").value.trim();
+
+      if (!name || !phone || !message || !debt || !payment) {
+        alert("이름, 연락처, 문의 내용을 모두 입력해주세요.");
+        return;
+      }
+
+      const data = { name, phone, debt, payment, message };
+
+      // 🔥 실제 Firebase Function URL 넣기
+      const response = await fetch(
+        "https://us-central1-naranlaw.cloudfunctions.net/submitConsult",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
+
+      // 🔍 상태 확인
+      const text = await response.text();
+      console.log("서버 응답:", text, "상태코드:", response.status);
+
+      alert(text); //  alert 표시
+
+      if (response.ok) form.reset(); // 성공 시 폼 초기화
+    } catch (error) {
+      console.error(" fetch 오류:", error);
+      alert("서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    }
+  };
+
+
+
+useEffect(() => {
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("show");
+          }
+          else {
+            // 👇 화면에서 사라지면 show 제거 → 다시 실행 가능
+            entry.target.classList.remove("show");
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+        const hiddenElements = document.querySelectorAll(".hidden");
+    hiddenElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+
+
   return (
     <div>
       <header><div className='대가리'><p className='마우스' >{/*여기에 마우스 이미지 넣어야함*/}<img src={마우스} height="35.5px" width="30px"  > 
@@ -20,7 +100,7 @@ function App() {
       <p className="피해"><img src={naran}height="40px" width="170px"></img> <span className='제발'>ㅤ피해 회복 전문 로펌</span>   </p>
       </div></header>
      
-      <section><div className='배경'>
+      <section className='hidden' ><div className='배경'>
         {/* 변호사 이미지 넣어야함 */}
         
         
@@ -35,13 +115,13 @@ function App() {
      </div></section>
 
 
-<div className='절차1'><section><div className='절차12'><p className='절차2'>일반적인 법적 절차만으로는</p><p className='절차2'>사기 피해금의 회수가 어렵습니다.</p></div>
+<div className='절차1 hidden'><section ><div className='절차12'><p className='절차2'>일반적인 법적 절차만으로는</p><p className='절차2'>사기 피해금의 회수가 어렵습니다.</p></div>
 <p className='절차3'>주식,코인,팀미션,로맨스 스캠,해외선물,공모주,폰지,다단계,구매대행,</p>
 <div className='절차34'><p className='절차3'>대출,사칭, 조작 등 다양한 사기 유형은 각각 다른 대응이 필요합니다.</p></div>
 
 <p className='절차4'><u className='절차4'>사기 수법에 맞춰 상황별로 적절한 조치를 취하는 것이 중요합니다.</u></p></section>
 </div> <section>
-<div className='컨테이너'   >  
+<div className='컨테이너 hidden'   >  
 <div className='카드'  ><p>코인/주식사기</p>
 <h3>거래소사칭,</h3>
 <h3>마진거래 블록딜,</h3>
@@ -73,31 +153,84 @@ function App() {
 
 
 </div></section>
+<section> 
+<div className='다양한'>          
+<h4 className='다양한1' >  다양한 금융사기 • 사건 환불사례 </h4> 
+<div className="rolling-container">
+      <div className="rolling-track">
 
-<div className='다양한'>  <section>        
-<h4 className='다양한' >  다양한 금융사기•사건 환불사례 </h4></section>  
-</div>
+        <div className="rolling-card">
+          <img src={roll1} alt="roll1" />
+        </div>
+
+        <div className="rolling-card">
+          <img src={roll2} alt="roll2" />
+        </div>
+
+        <div className="rolling-card">
+          <img src={roll3} alt="roll3" />
+        </div>
+
+        <div className="rolling-card">
+          <img src={roll4} alt="roll4" />
+        </div>
+        <div className="rolling-card">
+          <img src={roll5} alt="roll5" />
+        </div>
+
+        <div className="rolling-card">
+          <img src={roll6} alt="roll2" />
+        </div>
+
+        <div className="rolling-card">
+          <img src={roll7} alt="roll3" />
+        </div>
+
+        <div className="rolling-card">
+          <img src={roll8} alt="roll4" />
+        </div>
+        <div className="rolling-card">
+          <img src={roll9} alt="roll4" />
+        </div>
+        <div className="rolling-card">
+          <img src={roll10} alt="roll4" />
+        </div>
+        <div className="rolling-card">
+          <img src={roll11} alt="roll4" />
+        </div>
+
+        
+      </div>
+    </div>
+
+
+</div></section> 
 
 
 <div><section>  
-  <h5 className='사기 1'> 사기 피해 복구는 오직, 법무법인에서만 가능합니다.  </h5>
-<p className='피해 1'> 다양한 2차 피해를 유발하는 추가 사기가 발생하고 있습니다. </p>
-<p className='피해 1'>법무법인 나란, 피해회복전문로펌에서는 조속한 피해 대응이 가능합니다.</p>
+  <h5 className='사기1'> 사기 피해 복구는 오직, 법무법인에서만 가능합니다.  </h5>
+<div className='피해1'><p> <u> 다양한 2차 피해를 유발하는 추가 사기가 발생하고 있습니다. </u></p>
+<p>  <u>법무법인 나란, 피해회복전문로펌에서는 조속한 피해 대응이 가능합니다.</u></p>
+
+
+
+</div>
+<img src={상담} className='밑줄 hidden' ></img>
 
 </section>
 </div>
 <section> 
 <div className='자신있게'>
 <p className='말씀'> 자신있게 말씀드리겠습니다! </p>
-<p className='나란'>법무법인 나란에서 해결하지 못한 사건은</p>
-<p className='나란'>대한민국 그 어디서도 해결할 수 없습니다.</p>
+<p className='나란 scale-up'>법무법인 나란에서 해결하지 못한 사건은</p>
+<p className='나란 scale-up'>대한민국 그 어디서도 해결할 수 없습니다.</p>
 </div>
 </section> 
  <section> <div className='지금'>
   <p className='바로'>지금 바로 상담 받아보세요!</p>
   <div className='성공2'><p className='성공'>법무법인 나란은 다양한 성공사례로</p>
   <p className='성공' >고객님에게 알맞는 맞춤 컨설팅을 제공해드립니다.</p></div>
-  <form id="신청고고">
+  <form id="신청고고" onSubmit={handleSubmit}>
   <div class="row">
     <div class="col">
       <label>이름</label>
@@ -132,25 +265,24 @@ function App() {
   </div>
 <div className='바보'>
   <img src={경고}height="25px" width="25px"></img>  ㅤ개인정보는 암호화되어 안전하게 처리됩니다.</div>
-  <button>상담신청</button>
+  <button type="submit">상담신청</button>
 </form> </div></section>
 
 
 <footer><div className='푸터'>   
    <div className='하단'>
   <p className='법무법인'>법무법인 나란 분사무소</p>
- <div className='가로' > <div className='가로1'><p className='n'>분사무소</p><h6 className='n' >서울특별시 도봉구 도봉로803, 대연빌딩 1층</h6></div>
+ <div className='가로 row2' > <div className='가로1'><p className='n'>분사무소</p><h6 className='n' >서울특별시 도봉구 도봉로803, 대연빌딩 1층</h6></div>
 <div className='가로1'><p className='n'>본사무소</p><h6 className='n' >서울특별시 송파구 송파대로167, 문정역테라타워 A동 315호</h6></div>
 </div>
 
- <div className='가로'><div className='가로1'><p className='n'>사업자번호</p><h6 className='n'>221 - 85 - 21026 </h6></div>
+ <div className='가로 row3'><div className='가로1'><p className='n'>사업자번호</p><h6 className='n'>221 - 85 - 21026 </h6></div>
  <div className='가로1'><p className='n'>대표번호</p><h6 className='n'>02 - 954 - 1248 </h6></div>
 <div className='가로1'><p className='n'>팩스</p><h6 className='n'>02- 6455 -5249 </h6></div></div>
 
 
 
-<div className='가로'><div className='가로1'><p className='n'>이메일</p><h6 className='n'>dobong@naran.co.kr </h6></div>
-
+<div className='가로 row4'><div className='가로1'><p className='n'>이메일</p><h6 className='n'>dobong@naran.co.kr </h6></div>
 <div className='가로1'><p className='n'> 대표 변호사</p><h6 className='n'>서지원, 최지연 </h6></div></div>
 
 <p className='가로1'>Copyrights @ 2024 All Rights Reserved by NARAN</p>
