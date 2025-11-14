@@ -25,7 +25,8 @@ function scrollToSection(sectionId) {
 }
 
 function App() {
- const handleSubmit = async (e) => {
+
+const handleSubmit = async (e) => {
     e.preventDefault(); // 새로고침 방지
 
     try {
@@ -44,28 +45,36 @@ function App() {
 
       const data = { name, phone, debt, payment, message };
 
-      // 🔥 실제 Firebase Function URL 넣기
-      const response = await fetch(
-        "https://us-central1-naranlaw.cloudfunctions.net/submitConsult",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
-      );
+      // 🔥 Vercel API로 전송
+      const response = await fetch("API/텔레.js", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-      // 🔍 상태 확인
-      const text = await response.text();
-      console.log("서버 응답:", text, "상태코드:", response.status);
+      const json = await response.json();
+      console.log("서버 응답:", json);
 
-      alert(text); //  alert 표시
-
-      if (response.ok) form.reset(); // 성공 시 폼 초기화
+      if (response.ok) {
+        alert("상담 신청이 정상적으로 접수되었습니다!");
+        form.reset();
+      } else {
+        alert("서버 오류: " + json.error);
+      }
     } catch (error) {
-      console.error(" fetch 오류:", error);
+      console.error("🔥 fetch 오류:", error);
       alert("서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    }
-  };
+    } };
+
+
+
+
+
+
+
+
+
+
 
 
 
