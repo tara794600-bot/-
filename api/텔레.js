@@ -1,16 +1,12 @@
-// vercel serverless function — api/submit.js
-
 import { initializeApp, cert, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import fetch from "node-fetch";
 
-// ------------------------------
-// 🔥 1) Firebase Admin 초기화
-// ------------------------------
+// Firestore Admin 초기화 (중복 방지)
 if (!getApps().length) {
-  const serviceAccount = JSON.parse(
-    Buffer.from(process.env.FIREBASE_ADMIN_KEY, "base64").toString()
-  );
+  const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
+  
+  // 🔥 private_key 줄바꿈 처리
+  serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
 
   initializeApp({
     credential: cert(serviceAccount),
@@ -19,11 +15,7 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
-// ------------------------------
-// 🔥 2) 메인 핸들러
-// ------------------------------
 export default async function handler(req, res) {
-  // Vercel은 반드시 POST 허용 확인해야 함
   if (req.method !== "POST")
     return res.status(405).json({ error: "POST only" });
 
@@ -33,26 +25,20 @@ export default async function handler(req, res) {
     if (!name || !phone || !message)
       return res.status(400).json({ error: "입력값 부족" });
 
-    // ------------------------------
-    // 🔥 3) IP 추출
-    // ------------------------------
+    // 1) IP 추출
     const ip =
       req.headers["x-forwarded-for"]?.split(",")[0] ||
       req.socket?.remoteAddress ||
       "unknown";
 
-    // ------------------------------
-    // 🔥 4) 화이트리스트 검사
-    // ------------------------------
+    // 2) 화이트리스트 확인
     const whiteList = process.env.IP_WHITELIST
       ? process.env.IP_WHITELIST.split(",").map((v) => v.trim())
       : [];
 
     const isWhiteListed = whiteList.includes(ip);
 
-    // ------------------------------
-    // 🔥 5) 중복 IP 접수 차단
-    // ------------------------------
+    // 3) 화이트리스트가 아니면 → 중복 접수 차단
     if (!isWhiteListed) {
       const ipDoc = await db.collection("ipRecords").doc(ip).get();
       if (ipDoc.exists) {
@@ -61,14 +47,13 @@ export default async function handler(req, res) {
         });
       }
 
+      // IP 기록 저장
       await db.collection("ipRecords").doc(ip).set({
         createdAt: new Date(),
       });
     }
 
-    // ------------------------------
-    // 🔥 6) Firestore 저장
-    // ------------------------------
+    // 4) 상담 Firestore 저장
     await db.collection("consultRequests").add({
       name,
       phone,
@@ -79,9 +64,7 @@ export default async function handler(req, res) {
       createdAt: new Date(),
     });
 
-    // ------------------------------
-    // 🔥 7) Telegram 관리자 알림
-    // ------------------------------
+    // 5) 텔레그램 관리자 알림
     const text =
       "📢 상담 접수 알림\n\n" +
       `👤 이름: ${name}\n` +
@@ -97,34 +80,31 @@ export default async function handler(req, res) {
       await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: id, text }),
+        body: JSON.stringify({
+          chat_id: id,
+          text,
+        }),
       });
     }
 
-    // ------------------------------
-    // 🔥 8) Google Sheets 저장
-    // ------------------------------
+    // 6) Google Sheets 저장
     if (process.env.SHEET_ID) {
       await saveToSheet({ name, phone, debt, payment, message });
     }
 
     return res.status(200).json({ success: true });
   } catch (err) {
-    console.error("🔥 서버 오류:", err);
+    console.error("Error:", err);
     return res.status(500).json({ error: err.message });
   }
 }
 
-// ------------------------------
-// 🔥 9) Google Sheets 기록 함수
-// ------------------------------
+// Google Sheets 기록 함수
 async function saveToSheet({ name, phone, debt, payment, message }) {
   const { google } = await import("googleapis");
 
   const auth = new google.auth.GoogleAuth({
-    credentials: JSON.parse(
-      Buffer.from(process.env.FIREBASE_ADMIN_KEY, "base64").toString()
-    ),
+    credentials: JSON.parse(process.env.FIREBASE_ADMIN_KEY),
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 
@@ -141,7 +121,7 @@ async function saveToSheet({ name, phone, debt, payment, message }) {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.SHEET_ID,
-    range: "시트1!A:F",
+    range: "'새로운 나란 사기'!A:F", // ← 시트 이름 적용
     valueInputOption: "USER_ENTERED",
     requestBody: { values: [row] },
   });
