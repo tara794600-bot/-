@@ -27,50 +27,44 @@ function scrollToSection(sectionId) {
 function App() {
 
 const handleSubmit = async (e) => {
-    e.preventDefault(); // 새로고침 방지
+  e.preventDefault();
 
-    try {
-      // 폼 데이터 수집
-      const form = e.target;
-      const name = form.querySelector("input[placeholder='이름을 입력하세요']").value.trim();
-      const phone = form.querySelector("input[placeholder=\"'-'없이 입력해 주세요\"]").value.trim();
-      const debt = form.querySelector("input[placeholder='총 채무를 입력해 주세요']").value.trim();
-      const payment = form.querySelector("input[placeholder='월 상환액을 입력해 주세요']").value.trim();
-      const message = form.querySelector("textarea").value.trim();
+  try {
+    const form = e.target;
+    const name = form.querySelector("input[placeholder='이름을 입력하세요']").value.trim();
+    const phone = form.querySelector("input[placeholder=\"'-'없이 입력해 주세요\"]").value.trim();
+    const debt = form.querySelector("input[placeholder='총 채무를 입력해 주세요']").value.trim();
+    const payment = form.querySelector("input[placeholder='월 상환액을 입력해 주세요']").value.trim();
+    const message = form.querySelector("textarea").value.trim();
 
-      if (!name || !phone || !message || !debt || !payment) {
-        alert("이름, 연락처, 문의 내용을 모두 입력해주세요.");
-        return;
-      }
-
-      const data = { name, phone, debt, payment, message };
-
-      // 🔥 Vercel API로 전송
-      const response = await fetch("api/텔레.js", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-     const raw = await response.text();
-    console.log("서버 응답:", raw);
-
-    try {
-      data = JSON.parse(raw);  // JSON이 아니면 오류 발생 → catch로 빠짐
-    } catch {
-      data = { error: raw };
+    if (!name || !phone || !debt || !payment || !message) {
+      alert("이름, 연락처, 문의 내용을 모두 입력해주세요.");
+      return;
     }
 
-      if (response.ok) {
-        alert("상담 신청이 정상적으로 접수되었습니다!");
-        form.reset();
-      } else {
-        alert("서버 오류: " + json.error);
-      }
-    } catch (error) {
-      console.error("🔥 fetch 오류:", error);
-      alert("서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    } };
+    const body = { name, phone, debt, payment, message };
+
+    // 🔥 Vercel API는 확장자 없이 호출해야 함
+    const response = await fetch("/api/텔레", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const result = await response.json().catch(() => null);
+
+    if (response.ok) {
+      alert("상담 신청이 정상적으로 접수되었습니다!");
+      form.reset();
+    } else {
+      alert("서버 오류: " + (result?.error || "알 수 없는 오류"));
+    }
+  } catch (error) {
+    console.error("🔥 fetch 오류:", error);
+    alert("서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+  }
+};
+
 
 
 
