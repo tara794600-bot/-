@@ -52,8 +52,14 @@ const handleSubmit = async (e) => {
         body: JSON.stringify(data),
       });
 
-      const json = await response.json();
-      console.log("서버 응답:", json);
+     const raw = await response.text();
+    console.log("서버 응답:", raw);
+
+    try {
+      data = JSON.parse(raw);  // JSON이 아니면 오류 발생 → catch로 빠짐
+    } catch {
+      data = { error: raw };
+    }
 
       if (response.ok) {
         alert("상담 신청이 정상적으로 접수되었습니다!");
