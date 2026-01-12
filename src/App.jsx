@@ -105,7 +105,7 @@ useEffect(() => {
   return (
     <div>
       <header><div className='대가리'><p className='마우스' >{/*여기에 마우스 이미지 넣어야함*/}<img src={마우스} height="35.5px" width="30px"  > 
-      </img> <span className='환수'  > ㅤ환수 가능성을 먼저 확인하세요!</span> ㅤ범죄 피해액 환수, 아직 늦지 않았습니다.</p>
+      </img> <span className='환수'> ㅤ환수 가능성을 먼저 확인하세요!</span> ㅤ범죄 피해액 환수, 아직 늦지 않았습니다.</p>
       <p className="피해"><img src={naran}height="40px" width="170px"></img> <span className='제발'>ㅤ피해 회복 전문 로펌</span>   </p>
       </div></header>
      
